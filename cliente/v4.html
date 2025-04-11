@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>meu primeiro jogo</title>
+  </head>
+  <style>
+    canvas {
+      border: 10px solid #ccc;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      width: 400px;
+      height: 400px;
+    }
+  </style>
+  <body>
+    <canvas id="screen" width="10" height="10"></canvas>
+    <script>
+      // https://youtu.be/P5kfA6ncOs8?si=XXz6c97qK2Muxbsh
+      const screen = document.getElementById("screen");
+      const ctx = screen.getContext("2d");
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, screen.width, screen.height);
+
+
+
+      function creategame() {
+              const state = {
+        players: {
+          player1: { x: 1, y: 1 },
+          player2: { x: 9, y: 9 },
+        },
+        fruits: {
+          fruit1: { x: 3, y: 1 },
+        },
+      };
+
+
+        function movePlayer(command) {
+          console.log(`Moving ${command.player} with ${command.KeyPressed}`);
+          const KeyPressed = command.KeyPressed;
+          const player = state.players[command.player];
+          console.log(player);
+
+          if (player.x - 1 >= 0 && KeyPressed === "KeyA"  ) {
+            player.x -= 1;
+            return
+          }
+          if (player.y -1 >= 0 && KeyPressed === "KeyW" ) {
+            player.y -= 1
+            return
+          }
+          if ( player.x + 1 < screen.height && KeyPressed === "KeyD")  {
+            player.x += 1;
+            return
+          }
+          if  (player.y + 1 < screen.width && KeyPressed === "KeyS" ) {
+            player.y += 1;
+            return
+          }
+
+        }
+        return {
+          movePlayer,
+          state
+        };
+      }
+      const game = creategame();
+      const keybordListener = createKeybordListener();
+      keybordListener.subscribe(game.movePlayer)
+
+
+function createKeybordListener() {
+  const  state = {
+    observrs: []
+  }
+  function subscribe(observrFunction) {
+    state.observrs.push(observrFunction)
+  }
+  function notifyAll(command) {
+    console.log(`notifyAll ${state.observrs.length} observrs`)
+
+    for (const observrFunction of state.observrs) {
+      observrFunction(command)
+      }
+    }
+
+        document.addEventListener("keydown", handleKeydown);
+      function handleKeydown(event) {
+        let KeyPressed = event.code;
+        const command = {
+          type: "move-player",
+          player: "player1",
+          KeyPressed: KeyPressed,
+        };
+        notifyAll(command)
+     
+      }
+      return {
+        subscribe
+      }
+    
+}
+
+
+
+      renderScreen();
+
+      function renderScreen() {
+        ctx.clearRect(0, 0, 10, 10);
+
+        for (const playerId in game.state.players) {
+          const player = game.state.players[playerId];
+          ctx.fillStyle = "black";
+          ctx.fillRect(player.x, player.y, 1, 1);
+        }
+
+        for (const fruitId in game.state.fruits) {
+          const fruit = game.state.fruits[fruitId];
+          ctx.fillStyle = "green";
+          ctx.fillRect(fruit.x, fruit.y, 1, 1);
+        }
+
+        requestAnimationFrame(renderScreen);
+      }
+    </script>
+  </body>
+</html>

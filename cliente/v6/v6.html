@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>meu primeiro jogo</title>
+  </head>
+  <style>
+    canvas {
+      border: 10px solid #ccc;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+      image-rendering: -webkit-crisp-edges;
+      width: 400px;
+      height: 400px;
+    }
+  </style>
+  <body>
+    <canvas id="screen" width="10" height="10"></canvas>
+
+
+
+    <script type="module">
+      import createKeybordListener from './keybordListener.js'
+      import creategame from './game.js'
+      import renderScreen from './renderer.js'
+
+
+      // https://youtu.be/P5kfA6ncOs8?si=XXz6c97qK2Muxbsh
+      const screen = document.getElementById("screen");
+      const ctx =   
+      ctx.fillStyle = "#fff";
+      ctx.fillRect(0, 0, screen.width, screen.height);
+
+ 
+      const game = creategame();
+      game.addPlayer({
+        playerId: "player1",
+        playerX: 4,
+        playerY: 3,
+      });
+      game.addPlayer({
+        playerId: "player2",
+        playerX: 4,
+        playerY: 5,
+      });
+      game.addFruit({
+        fruitId: 'fruit1',
+        fruitX: 5,
+        fruitY: 6,
+      });
+      game.addFruit({
+        fruitId: 'fruit2',
+        fruitX: 9,
+        fruitY: 9,
+      });
+
+      const keybordListener = createKeybordListener();
+      keybordListener.subscribe(game.movePlayer);
+
+      renderScreen(screen, game, requestAnimationFrame);
+    </script>
+  </body>
+</html>
