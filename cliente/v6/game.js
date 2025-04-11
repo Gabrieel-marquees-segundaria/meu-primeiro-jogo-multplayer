@@ -66,7 +66,7 @@ export default function creategame() {
         },
       };
       const KeyPressed = command.KeyPressed;
-      const playerId = command.playerId;
+      const playerId = command.player;
       const player = state.players[playerId];
       const moveFunction = acceptedMoves[KeyPressed];
       if (player && moveFunction) {

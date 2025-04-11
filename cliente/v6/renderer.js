@@ -2,6 +2,7 @@
 
 
 export default function renderScreen(screen, game, requestAnimationFrame) {
+	const ctx = screen.getContext("2d");
   ctx.clearRect(0, 0, 10, 10);
 
   for (const playerId in game.state.players) {
