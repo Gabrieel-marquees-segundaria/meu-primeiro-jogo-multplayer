@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<style>
+		body {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			font-family: Arial, sans-serif;
+			margin: 0;
+			padding: 20px;
+		}
+
+		.main-container {
+			display: flex;
+			width: 100%;
+			max-width: 900px;
+			gap: 20px;
+		}
+
+		.game-container {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+		}
+
+		canvas {
+			border: 10px solid #ccc;
+			image-rendering: pixelated;
+			image-rendering: crisp-edges;
+			image-rendering: -webkit-crisp-edges;
+			width: 400px;
+			height: 400px;
+			margin-bottom: 20px;
+		}
+
+		.controls {
+			display: grid;
+			grid-template-areas:
+			". up ."
+			"left . right"
+			". down .";
+			grid-gap: 10px;
+			margin-bottom: 20px;
+		}
+
+		.control-btn {
+			width: 60px;
+			height: 60px;
+			border-radius: 50%;
+			border: none;
+			background-color: #4a90e2;
+			color: white;
+			font-size: 24px;
+			cursor: pointer;
+			display: flex;
+			justify-content: center;
+			align-items: center;
+			transition: background-color 0.2s;
+		}
+
+		.control-btn:hover {
+			background-color: #357ac0;
+		}
+
+		.control-btn:active {
+			background-color: #2a5d8f;
+			transform: scale(0.95);
+			}
+
+			#up-btn {
+			grid-area: up;
+		}
+
+		#left-btn {
+			grid-area: left;
+		}
+
+		#right-btn {
+			grid-area: right;
+		}
+
+		#down-btn {
+			grid-area: down;
+		}
+
+		.input-group {
+			display: flex;
+			flex-direction: column;
+			margin-bottom: 15px;
+			width: 100%;
+			max-width: 300px;
+		}
+
+		.input-group label {
+			margin-bottom: 5px;
+			font-weight: bold;
+		}
+
+		.input-group input {
+			padding: 8px;
+			border: 1px solid #ccc;
+			border-radius: 4px;
+		}
+
+		.input-group button {
+			padding: 8px 16px;
+			background-color: #4a90e2;
+			color: white;
+			border: none;
+			border-radius: 4px;
+			cursor: pointer;
+			margin-top: 5px;
+		}
+
+		.input-group button:hover {
+			background-color: #357ac0;
+		}
+
+		.players-list {
+			min-width: 200px;
+			height: 420px;
+			/* Match canvas height + border */
+			border: 1px solid #ccc;
+			border-radius: 4px;
+			padding: 10px;
+			overflow-y: auto;
+			background-color: #f9f9f9;
+		}
+
+		.players-list h3 {
+			margin-top: 0;
+			padding-bottom: 10px;
+			border-bottom: 1px solid #eee;
+		}
+
+		.players-list ul {
+			list-style-type: none;
+			padding: 0;
+			margin: 0;
+		}
+
+		.players-list li {
+			padding: 8px 5px;
+			border-bottom: 1px solid #eee;
+		}
+
+		.players-list li:last-child {
+			border-bottom: none;
+		}
+		</style>
+	</head>
+	<body>
+		<div class="main-container">
+			<div class="game-container">
+				<canvas id="screen" width="10" height="10"></canvas>
+
+				<div class="controls">
+					<button id="up-btn" class="control-btn">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M12 19V5M12 5l7 7M12 5l-7 7" />
+						</svg>
+					</button>
+
+					<button id="left-btn" class="control-btn">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M19 12H5M5 12l7 7M5 12l7-7" />
+						</svg>
+					</button>
+
+					<button id="right-btn" class="control-btn">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M5 12h14M19 12l-7 7M19 12l-7-7" />
+						</svg>
+					</button>
+
+					<button id="down-btn" class="control-btn">
+						<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+							<path d="M12 5v14M12 19l7-7M12 19l-7-7" />
+						</svg>
+					</button>
+				</div>
+
+				<div class="input-group">
+					<label for="spawn-input">Spawn</label>
+					<input type="number" id="spawn-input" placeholder="Fruits appear in time" value="2000">
+
+					<button id="Fruits-start">Start</button>
+					<button id="Fruits-stop">Stop</button>
+				</div>
+
+				<div class="input-group">
+					<label for="remove-input">Remove Player</label>
+					<input type="text" id="remove-input" placeholder="Enter player id">
+					<button id="remove-btn">Remove Player</button>
+				</div>
+			</div>
+
+			<div class="players-list">
+				<h3>Players</h3>
+				<ul id="players-names">
+					<!-- Player names will be populated here -->
+				</ul>
+			</div>
+		</div>
+
+		<script src="buttons.js"></script>
+		<!-- Cliente Socket.IO -->
+		<script src="/socket.io/socket.io.js"></script>
+		<script type="module">
+			import createKeybordListener from "./keybordListener.js";
+			import createGame from "./game.js";
+			import renderScreen from "./renderer.js";
+
+			const socket = io();
+
+			// https://youtu.be/P5kfA6ncOs8?si=XXz6c97qK2Muxbsh
+
+			// const ctx = screen.getContext("2d");
+			// ctx.fillStyle = "#fff";
+			// ctx.fillRect(0, 0, screen.width, screen.height);
+
+			// const playerId = socket.id;
+			const game = createGame();
+
+			const keybordListener = createKeybordListener(document);
+
+			socket.on("connect", () => {
+				const screen = document.getElementById("screen");
+				const playerId = socket.id;
+				console.log("playerId conected on Cliente with id: ", playerId);
+
+				renderScreen(screen, game, requestAnimationFrame, socket.id);
+
+			});
+			socket.on("disconnect", () => {
+				console.log("playerId desconectado");
+			});
+			socket.on("setup", (state) => {
+				console.log(` teste do socket ${JSON.stringify(socket.id)}`);
+				const playerId = socket.id;
+				game.setState(state);
+				keybordListener.registerPlayerId(playerId);
+				keybordListener.subscribe(game.movePlayer);
+				keybordListener.subscribe((command) => {
+					socket.emit("move-player", command);
+				});
+				StartTebla()
+			});
+
+			socket.on("add-player", (command) => {
+				console.log(
+					`> Reseiving '${command.type}' event from server --> ${command.playerId}`
+				);
+				console.log(command);
+				game.addPlayer(command);
+			});
+
+			socket.on("remove-player", (command) => {
+				console.log(
+					`> Reseiving '${command.type}' event from server --> ${command.playerId}`
+				);
+				game.removePlayer(command);
+			});
+
+			socket.on("move-player", (command) => {
+				console.log(
+					`> Reseiving '${command.type}' event from server --> ${command.playerId}`
+				);
+				const playerId = socket.id;
+
+				if (playerId !== command.playerId) {
+					game.movePlayer(command);
+				}
+
+				socket.on('add-fruit', (command) => {
+					console.log(`Receiving ${command.type} -> ${command.fruitId}`)
+					game.addFruit(command)
+				})
+
+				socket.on('remove-fruit', (command) => {
+					console.log(`Receiving ${command.type} -> ${command.fruitId}`)
+					game.removeFruit(command)
+				})
+			});
+
+
+			document.getElementById("Fruits-start").addEventListener("click",
+				()=> {
+					let time = document.getElementById("spawn-input").value;
+					console.log(time)
+
+					socket.emit("admin-start-fruit-game", {
+						time: time
+					})
+				})
+			document.getElementById("Fruits-stop").addEventListener("click",
+				()=> {
+
+					socket.emit("admin-stop-fruit-game")
+				})
+
+
+
+
+			/// ====== players table =======
+			const table = document.getElementById("players-names")
+			let items = ""
+			function StartTebla() {
+				const players = game.state.players
+				let cont = 1;
+				Object.keys(players).forEach(key => {
+					items += `
+					<li> <span id="list-item-id">${cont++}</span>:  ${key}</li>
+					`
+				})
+				table.innerHTML += items
+			}
+
+			function updateTebla() {
+				table.innerHTML = ""
+			}
+
+		</script>
+	</body>
+</html>
