@@ -3,7 +3,7 @@ export default function createGame() {
     players: {},
     fruits: {},
     screen: { width: 10, height: 10 },
-    frequecy: 2000
+    frequecy: 2000,
   };
 
   const observrs = [];
@@ -19,7 +19,7 @@ export default function createGame() {
     observrs.push(observrFunction);
   }
   function notifyAll(command) {
-    console.log(`notifyAll ${observrs.length} observrs`);
+    console.log(`notifyAll ${observrs.length} game observrs`);
 
     for (const observrFunction of observrs) {
       observrFunction(command);
@@ -36,13 +36,14 @@ export default function createGame() {
       "playerY" in command
         ? command.playerY
         : Math.floor(Math.random() * state.screen.height);
-    state.players[playerId] = { x: playerX, y: playerY };
+    state.players[playerId] = { x: playerX, y: playerY, score: [] };
 
     notifyAll({
       type: "add-player",
       playerId: playerId,
       playerX: playerX,
-      playerY: playerY
+      playerY: playerY,
+      score: [],
     });
   }
   function removePlayer(command) {
@@ -50,7 +51,7 @@ export default function createGame() {
     delete state.players[playerId];
     notifyAll({
       type: "remove-player",
-      playerId: playerId
+      playerId: playerId,
     });
   }
 
@@ -70,21 +71,23 @@ export default function createGame() {
       type: "add-fruit",
       fruitId: fruitId,
       fruitX: fruitX,
-      fruitY: fruitY
+      fruitY: fruitY,
     });
     return {
       type: "add-fruit",
       fruitId: fruitId,
       fruitX: fruitX,
-      fruitY: fruitY
-    }
+      fruitY: fruitY,
+    };
   }
   function removeFruit(command) {
     const fruitId = command.fruitId;
+    const playerId = command.playerId;
     delete state.fruits[fruitId];
     notifyAll({
       type: "remove-fruit",
-      fruitId: fruitId
+      fruitId: fruitId,
+      playerId: playerId,
     });
   }
   function setState(Nstete) {
@@ -97,7 +100,8 @@ export default function createGame() {
       const fruit = state.fruits[fruitId];
       if (player.x === fruit.x && player.y === fruit.y) {
         removeFruit({
-          fruitId: fruitId
+          fruitId: fruitId,
+          playerId: playerId,
         });
       }
     }
@@ -126,7 +130,7 @@ export default function createGame() {
         if (player.x + 1 < state.screen.width) {
           player.x += 1;
         }
-      }
+      },
     };
     const KeyPressed = command.KeyPressed;
     const playerId = command.player;
@@ -137,8 +141,18 @@ export default function createGame() {
       checkForFruitColision(playerId);
     }
   }
+  function UpdateScore(command) {
+    
+    if (!"playerId" in command) return;
+    const playerId = command.playerId;
+    if (state.players[playerId].score.includes(command.fruitId)) return;
+    
+    state.players[playerId].score.push(command.fruitId);
+    console.log(`update score ${playerId} ${JSON.stringify(state.players[playerId])}`);
 
+  }
   return {
+    UpdateScore,
     addPlayer,
     removePlayer,
     addFruit,
@@ -148,6 +162,6 @@ export default function createGame() {
     setFrequecy,
     subscribe,
     start,
-    state
+    state,
   };
 }

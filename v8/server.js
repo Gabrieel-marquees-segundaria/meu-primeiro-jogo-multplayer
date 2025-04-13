@@ -21,7 +21,7 @@ function getLocalIP() {
   return "IP não encontrado";
 }
 const localIP = getLocalIP();
-let frequecy = 2000;
+let timer = null;
 
 const app = express();
 const server = http.createServer(app);
@@ -34,7 +34,10 @@ const game = createGame();
 game.subscribe(command => {
   console.log(`Game state changed: ${command.type}`);
   sockets.emit(command.type, command);
-});
+  if (command.type === "remove-fruit") {
+    sockets.emit("admin-update-score-game", command);
+  }
+ });
 
 sockets.on("connection", socket => {
   const playerId = socket.id;
@@ -56,19 +59,26 @@ sockets.on("connection", socket => {
   let fruitGameInterval;
   socket.on("admin-start-fruit-game", time => {
     console.log(time);
+    timer = time.time
     clearInterval(fruitGameInterval);
     fruitGameInterval = setInterval(() => {
       const fruitData = game.addFruit();
-      if (fruitData) {
+      if (fruitData && timer) {
         socket.emit("add-fruit", fruitData);
       }
-    }, parseInt(time.time));
+    }, parseInt(timer) || 2000);
+
   });
   socket.on("admin-stop-fruit-game", () => {
     clearInterval(fruitGameInterval);
+    timer = null;
   });
-});
 
+});
+  sockets.on("admin-players-update-score", commad => {
+    game.UpdateScore(commad);
+  });
+  
 server.listen(8000, () => {
   console.log(`listening on in ${localIP}:8000`);
 });
